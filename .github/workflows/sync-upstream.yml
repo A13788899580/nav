@@ -1,0 +1,29 @@
+name: 同步上游主分支
+
+on:
+  schedule:
+    - cron: '0 18 * * 3' # 每周三北京时间凌晨2点UTC时间18点
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Sync with upstream
+      run: |
+        # 添加上游仓库
+        git remote add upstream https://github.com/deerwan/nav.git
+        
+        # 同步主分支
+        git fetch upstream
+        git checkout main
+        git rebase upstream/main
+        git push origin main --force-with-lease
